@@ -1,0 +1,806 @@
+<?xml version="1.0" encoding="UTF-8"?><rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title>Romanos-Antonios Trechlis</title><link>romanostrechlis.github.io</link><language>en-us</language><description>This is my personal blog.</description><lastBuildDate>28 Aug 2018 16:42 +0300</lastBuildDate><atom:link href="romanostrechlis.github.io/index.xml" rel="self" type="application/rss+xml"/><item><title>Interactive command line sessions library</title><link>romanostrechlis.github.io/nteractive_command_line_tool/</link><guid>romanostrechlis.github.io/nteractive_command_line_tool/</guid><pubDate>03 Aug 2018 20:00 +0000</pubDate><description>&lt;p&gt;&lt;a href=&quot;https://travis-ci.org/RomanosTrechlis/go-icls&quot;&gt;&lt;img src=&quot;https://travis-ci.org/RomanosTrechlis/go-icls.svg?branch=master&quot; alt=&quot;Build Status&quot;/&gt;&lt;/a&gt;
+&lt;a href=&quot;https://goreportcard.com/report/github.com/RomanosTrechlis/go-icls&quot;&gt;&lt;img src=&quot;https://goreportcard.com/badge/github.com/RomanosTrechlis/go-icls&quot; alt=&quot;Go Report Card&quot;/&gt;&lt;/a&gt;
+&lt;a href=&quot;https://codecov.io/gh/RomanosTrechlis/go-icls&quot;&gt;&lt;img src=&quot;https://codecov.io/gh/RomanosTrechlis/go-icls/branch/master/graph/badge.svg&quot; alt=&quot;codecov&quot;/&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;I usually have some trouble when it comes to creating a cli for an application. That, of course, led me to create my own library.&lt;/p&gt;
+
+&lt;h2&gt;ICLS&lt;/h2&gt;
+
+&lt;p&gt;ICLS stands for Interactive Command Line Session. That means that when the program is executed, it creates its own prompt for entering commands.&lt;/p&gt;
+
+&lt;p&gt;For more information of the different types of cli’s see &lt;a href=&quot;https://en.wikipedia.org/wiki/Command-line_interface#Operating_system_command-line_interfaces&quot;&gt;wiki&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h2&gt;go-icls&lt;/h2&gt;
+
+&lt;p&gt;The library I can provide both an ICLS and a usual cli. The difference is that the cli takes a command, executes, and exits, while the ICLS return to a prompt instead of exiting.&lt;/p&gt;
+
+&lt;h3&gt;Run vs Execute&lt;/h3&gt;
+
+&lt;p&gt;&lt;em&gt;Run()&lt;/em&gt; and &lt;em&gt;Execute(cmd string)&lt;/em&gt; are the definitions of two seperate methods. &lt;em&gt;Run()&lt;/em&gt; has an infinate loop, waiting for user input, that gets passed to the &lt;em&gt;Execute(cmd string)&lt;/em&gt; method. The &lt;em&gt;Execute(cmd string)&lt;/em&gt; method takes as input a line, usually from os.Args.&lt;/p&gt;
+
+&lt;h3&gt;Parser&lt;/h3&gt;
+
+&lt;p&gt;In the core of &lt;em&gt;Execute(cmd string)&lt;/em&gt; method, lies the parser. It takes the line and returns the command name and a map[string]string for the flags.&lt;/p&gt;
+
+&lt;h3&gt;Command definition&lt;/h3&gt;
+
+&lt;p&gt;Commands are defined beforehand. Every command is part of the &lt;em&gt;CLI struct&lt;/em&gt;, and has a name, a short description, a long description, and a handler.&lt;/p&gt;
+
+&lt;p&gt;The handler is a func that takes a map[string]string, which is the flags that user passed along the command and returns an error:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-go&quot;&gt;&lt;span class=&quot;kwd&quot;&gt;func&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;flags&lt;/span&gt; &lt;span class=&quot;kwd&quot;&gt;map&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;string&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;]&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;string&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;error&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This is an example of a command definition:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-go&quot;&gt;&lt;span class=&quot;pln&quot;&gt;c&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;cli&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;typ&quot;&gt;New&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;com&quot;&gt;// return a CLI struct without any commands&lt;/span&gt;
+&lt;span class=&quot;pln&quot;&gt;g&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;c&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;typ&quot;&gt;New&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;str&quot;&gt;&amp;#34;cmdName&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;str&quot;&gt;&amp;#34;short description&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;str&quot;&gt;&amp;#34;long description&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kwd&quot;&gt;func&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;flags&lt;/span&gt; &lt;span class=&quot;kwd&quot;&gt;map&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;string&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;]&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;string&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;com&quot;&gt;// do something&lt;/span&gt;
+&lt;span class=&quot;pun&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3&gt;Flag definition&lt;/h3&gt;
+
+&lt;p&gt;With commands come flags that change the behavior of the command in very specific ways.&lt;/p&gt;
+
+&lt;p&gt;A flag has a name, an alias, a data type, a default value, a description, and a required flag. The generic method to add flags to a command is the following:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-go&quot;&gt;&lt;span class=&quot;kwd&quot;&gt;func&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;c&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;command&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;typ&quot;&gt;Flag&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kwd&quot;&gt;alias&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;dataType&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;string&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;defaultValue&lt;/span&gt; &lt;span class=&quot;kwd&quot;&gt;interface&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;description&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;string&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;isRequired&lt;/span&gt; &lt;span class=&quot;kwd&quot;&gt;bool&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;error&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The default value must be of type defined as the dataType of flag.&lt;/p&gt;
+
+&lt;p&gt;However, the data type can be ommited when using the specific type methods to define a flag:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-go&quot;&gt;&lt;span class=&quot;pln&quot;&gt;g&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;typ&quot;&gt;IntFlag&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;str&quot;&gt;&amp;#34;i&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;str&quot;&gt;&amp;#34;intFlag&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;dec&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;str&quot;&gt;&amp;#34;this is an int flag&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kwd&quot;&gt;false&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;pln&quot;&gt;g&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;typ&quot;&gt;StringFlag&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;str&quot;&gt;&amp;#34;s&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;str&quot;&gt;&amp;#34;stringFlag&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;str&quot;&gt;&amp;#34;0&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;str&quot;&gt;&amp;#34;this is a string flag&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kwd&quot;&gt;false&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;pln&quot;&gt;g&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;typ&quot;&gt;BoolFlag&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;str&quot;&gt;&amp;#34;s&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;str&quot;&gt;&amp;#34;stringFlag&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;str&quot;&gt;&amp;#34;this is a string flag&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kwd&quot;&gt;false&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;In bool flag definition, the default value is ommited entirally, because it is expected to be always false, since the existance of the flag in user input implies a true value.&lt;/p&gt;
+
+&lt;h2&gt;Example usage&lt;/h2&gt;
+
+&lt;p&gt;Following is an example program that defines two commands and some flags for each command.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-go&quot;&gt;&lt;span class=&quot;kwd&quot;&gt;package&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;main&lt;/span&gt;
+
+&lt;span class=&quot;kwd&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;(&lt;/span&gt;
+    &lt;span class=&quot;str&quot;&gt;&amp;#34;fmt&amp;#34;&lt;/span&gt;
+
+    &lt;span class=&quot;str&quot;&gt;&amp;#34;github.com/RomanosTrechlis/go-icls/cli&amp;#34;&lt;/span&gt;
+&lt;span class=&quot;pun&quot;&gt;)&lt;/span&gt;
+
+&lt;span class=&quot;kwd&quot;&gt;func&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;main&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;com&quot;&gt;// create a new cli&lt;/span&gt;
+    &lt;span class=&quot;pln&quot;&gt;c&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;cli&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;typ&quot;&gt;New&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;com&quot;&gt;// add &amp;#39;get&amp;#39; command to cli&lt;/span&gt;
+    &lt;span class=&quot;kwd&quot;&gt;get&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;c&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;typ&quot;&gt;New&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;str&quot;&gt;&amp;#34;get&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;str&quot;&gt;&amp;#34;get gets&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;str&quot;&gt;&amp;#34;get gets&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kwd&quot;&gt;func&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;flags&lt;/span&gt; &lt;span class=&quot;kwd&quot;&gt;map&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;string&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;]&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;string&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;error&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;pln&quot;&gt;fmt&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;typ&quot;&gt;Println&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;str&quot;&gt;&amp;#34;This is the get command&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;kwd&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;kwd&quot;&gt;nil&lt;/span&gt;
+    &lt;span class=&quot;pun&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;com&quot;&gt;// add &amp;#39;get&amp;#39; command flags&lt;/span&gt;
+    &lt;span class=&quot;kwd&quot;&gt;get&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;typ&quot;&gt;StringFlag&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;str&quot;&gt;&amp;#34;d&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;str&quot;&gt;&amp;#34;&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;str&quot;&gt;&amp;#34;&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;str&quot;&gt;&amp;#34;directory name&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kwd&quot;&gt;false&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;kwd&quot;&gt;get&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;typ&quot;&gt;StringFlag&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;str&quot;&gt;&amp;#34;t&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;str&quot;&gt;&amp;#34;tetetetetetetet&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;str&quot;&gt;&amp;#34;&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;str&quot;&gt;&amp;#34;directory name&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kwd&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;)&lt;/span&gt;
+
+    &lt;span class=&quot;com&quot;&gt;// add &amp;#39;put&amp;#39; command to cli&lt;/span&gt;
+    &lt;span class=&quot;pln&quot;&gt;put&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;c&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;typ&quot;&gt;New&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;str&quot;&gt;&amp;#34;puttertesttest&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;str&quot;&gt;&amp;#34;putter puts&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;str&quot;&gt;&amp;#34;putter puts&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kwd&quot;&gt;func&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;flags&lt;/span&gt; &lt;span class=&quot;kwd&quot;&gt;map&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;string&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;]&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;string&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;error&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;pln&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;err&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;c&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;typ&quot;&gt;IntValue&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;str&quot;&gt;&amp;#34;g&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;str&quot;&gt;&amp;#34;puttertesttest&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;flags&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;kwd&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;err&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;!&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kwd&quot;&gt;nil&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;kwd&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;err&lt;/span&gt;
+        &lt;span class=&quot;pun&quot;&gt;}&lt;/span&gt;
+        &lt;span class=&quot;pln&quot;&gt;fmt&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;typ&quot;&gt;Printf&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;str&quot;&gt;&amp;#34;This is the putter command: %d\n&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;kwd&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;kwd&quot;&gt;nil&lt;/span&gt;
+    &lt;span class=&quot;pun&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;com&quot;&gt;// add &amp;#39;put&amp;#39; command flags&lt;/span&gt;
+    &lt;span class=&quot;pln&quot;&gt;put&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;typ&quot;&gt;StringFlag&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;str&quot;&gt;&amp;#34;f&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;str&quot;&gt;&amp;#34;file&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;str&quot;&gt;&amp;#34;&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;str&quot;&gt;&amp;#34;filename to put&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kwd&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;pln&quot;&gt;put&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;typ&quot;&gt;IntFlag&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;str&quot;&gt;&amp;#34;g&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;str&quot;&gt;&amp;#34;int&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;dec&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;str&quot;&gt;&amp;#34;int to put&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kwd&quot;&gt;false&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;)&lt;/span&gt;
+
+    &lt;span class=&quot;pln&quot;&gt;c&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;typ&quot;&gt;Run&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;pun&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;And this is the output:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;$ go-icls
+&amp;gt; -h
+Usage:
+
+        go-icls.exe &amp;lt;command&amp;gt; [options]
+
+Commands:
+        get                   get gets
+        puttertesttest        putter puts
+
+Use &amp;#34;go-icls.exe &amp;lt;command&amp;gt; -h&amp;#34; for more information about a command.
+&amp;gt; get -h
+usage: get [get flags]
+
+get gets
+
+Flags:
+
+        -d
+                                directory name
+        -h    --help
+                                prints out information about the command
+        -t    --tetetetetetetet
+                                directory name (required: true)
+&amp;gt; get -d test
+This is the get command
+&amp;gt; quit
+
+$
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;In order to include go-icls functionality into an application, import:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-go&quot;&gt;&lt;span class=&quot;kwd&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;str&quot;&gt;&amp;#34;github.com/RomanosTrechlis/go-icls/cli&amp;#34;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Use the &lt;strong&gt;quit&lt;/strong&gt; command to exit the interactive interface.&lt;/p&gt;
+
+&lt;h2&gt;TODO&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;[ ] Have 100% test coverage.&lt;/li&gt;
+&lt;li&gt;[ ] Add var name on printed help after non bool flag (thinking about it).&lt;/li&gt;
+&lt;li&gt;[ ] Find a way to simplify the IntValue, BoolValue, etc methods.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Get the full code &lt;a href=&quot;https://github.com/RomanosTrechlis/go-icls&quot;&gt;here&lt;/a&gt;&lt;/p&gt;
+</description></item><item><title>Writing logs to file from a cluster</title><link>romanostrechlis.github.io/og_scribe_and_log_mediator/</link><guid>romanostrechlis.github.io/og_scribe_and_log_mediator/</guid><pubDate>14 Oct 2017 13:21 +0000</pubDate><description>&lt;p&gt;&lt;a href=&quot;https://travis-ci.org/RomanosTrechlis/go-scribe&quot;&gt;&lt;img src=&quot;https://travis-ci.org/RomanosTrechlis/go-scribe.svg?branch=master&quot; alt=&quot;Build Status&quot;/&gt;&lt;/a&gt;
+&lt;a href=&quot;https://goreportcard.com/report/github.com/RomanosTrechlis/go-scribe&quot;&gt;&lt;img src=&quot;https://goreportcard.com/badge/github.com/RomanosTrechlis/go-scribe&quot; alt=&quot;Go Report Card&quot;/&gt;&lt;/a&gt;
+&lt;a href=&quot;https://codecov.io/gh/RomanosTrechlis/go-scribe&quot;&gt;&lt;img src=&quot;https://codecov.io/gh/RomanosTrechlis/go-scribe/branch/master/graph/badge.svg&quot; alt=&quot;codecov&quot;/&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Updated: 3/8/2018&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;Recently, at work, I kept falling into a problem regarding log files. Logs are written in files located to the server machine, meaning that for the retrieval someone must have access to the production cluster. In addition, their retrieval is time consuming, since someone must go to each server machine and copy the log files. So, I decided to tackle this problem with a custom solution that might never be introduced to production, however it will be an excellent weekend problem to solve.&lt;/p&gt;
+
+&lt;p&gt;What I want, is to make a system:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;that writes logs to a single location for all cluster nodes,&lt;/li&gt;
+&lt;li&gt;keep logging into files, and&lt;/li&gt;
+&lt;li&gt;at the same time respects the security policy we have.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;The first thought was to implement an endpoint that receives something to log. For file logging, we require:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;a relative path,&lt;/li&gt;
+&lt;li&gt;a filename (without the .log extension), and&lt;/li&gt;
+&lt;li&gt;a line to write.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h2&gt;Communication&lt;/h2&gt;
+
+&lt;p&gt;Looking around I found the gRPC framework for communication between client and server, and the protobuf language to write the structure of the messages exchanged between client and server.&lt;/p&gt;
+
+&lt;p&gt;This is the message sent to the server:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-protobuf&quot;&gt;&lt;span class=&quot;pln&quot;&gt;message&lt;/span&gt; &lt;span class=&quot;typ&quot;&gt;LogRequest&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;pln&quot;&gt;string&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;filename&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;dec&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;pln&quot;&gt;string&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;path&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;dec&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;pln&quot;&gt;string&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;line&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;dec&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;pun&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;And I also defined an rpc service:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-protobuf&quot;&gt;&lt;span class=&quot;pln&quot;&gt;service&lt;/span&gt; &lt;span class=&quot;typ&quot;&gt;LogScribe&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;com&quot;&gt;// the LogScribe service sends a LogRequest&lt;/span&gt;
+  &lt;span class=&quot;com&quot;&gt;// and recieves a LogResponse&lt;/span&gt;
+  &lt;span class=&quot;pln&quot;&gt;rpc&lt;/span&gt; &lt;span class=&quot;typ&quot;&gt;Log&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;typ&quot;&gt;LogRequest&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;returns&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;typ&quot;&gt;LogResponse&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;pun&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Btw, I named the server &lt;strong&gt;logScribe&lt;/strong&gt;, because it scribes messages.&lt;/p&gt;
+
+&lt;p&gt;The only remaining thing is to compile the protobuf notation to something we can use.
+For this we need the &lt;strong&gt;protoc&lt;/strong&gt; command and a given language plugin, like go or java. So, in order to compile it to go code we use the command:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;&lt;span class=&quot;pun&quot;&gt;$&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;protoc&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;go_out&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;plugins&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;grpc&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;proto&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;and in order to produce java code we use the command:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;&lt;span class=&quot;pun&quot;&gt;$&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;protoc&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;grpc&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;java_out&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;\&lt;/span&gt;
+  &lt;span class=&quot;pun&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;plugin&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;protoc&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;gen&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;grpc&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;~&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;go&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;bin&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;protoc&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;gen&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;grpc&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;java&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;\&lt;/span&gt;
+  &lt;span class=&quot;pun&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;java_out&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;proto&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;where what goes after the protoc-gen-grpc is the path to the java plugin.&lt;/p&gt;
+
+&lt;p&gt;This combination gives an endpoint where all clusters can send log requests and the logScribe will write them on a single place.&lt;/p&gt;
+
+&lt;h2&gt;Security&lt;/h2&gt;
+
+&lt;p&gt;So, in order to make it secure I tried something new for me. A two-way SSL authentication. This requires both the client and the server having SSL certificates, so both client and server trust each other.&lt;/p&gt;
+
+&lt;p&gt;I used certstrap in order to produce a dummy certificate authority, and then produce signed certificates for the server and the client:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;&lt;span class=&quot;pun&quot;&gt;$&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;certstrap&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;depot&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;path&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;certs&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;init&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;cn&lt;/span&gt; &lt;span class=&quot;str&quot;&gt;&amp;#34;CertAuth&amp;#34;&lt;/span&gt;
+
+&lt;span class=&quot;pun&quot;&gt;$&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;certstrap&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;depot&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;path&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;certs&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;request&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;cert&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;ip&lt;/span&gt; &lt;span class=&quot;dec&quot;&gt;127.0&lt;/span&gt;&lt;span class=&quot;dec&quot;&gt;.0&lt;/span&gt;&lt;span class=&quot;dec&quot;&gt;.1&lt;/span&gt;
+&lt;span class=&quot;pun&quot;&gt;$&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;certstrap&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;depot&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;path&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;certs&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;sign&lt;/span&gt; &lt;span class=&quot;dec&quot;&gt;127.0&lt;/span&gt;&lt;span class=&quot;dec&quot;&gt;.0&lt;/span&gt;&lt;span class=&quot;dec&quot;&gt;.1&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;typ&quot;&gt;CA&lt;/span&gt; &lt;span class=&quot;typ&quot;&gt;CertAuth&lt;/span&gt;
+&lt;span class=&quot;pun&quot;&gt;$&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;mv&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;certs&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;dec&quot;&gt;127.0&lt;/span&gt;&lt;span class=&quot;dec&quot;&gt;.0&lt;/span&gt;&lt;span class=&quot;dec&quot;&gt;.1&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;crt&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;certs&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;server&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;crt&lt;/span&gt;
+&lt;span class=&quot;pun&quot;&gt;$&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;mv&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;certs&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;dec&quot;&gt;127.0&lt;/span&gt;&lt;span class=&quot;dec&quot;&gt;.0&lt;/span&gt;&lt;span class=&quot;dec&quot;&gt;.1&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;key&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;certs&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;server&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;key&lt;/span&gt;
+&lt;span class=&quot;pun&quot;&gt;$&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;mv&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;certs&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;dec&quot;&gt;127.0&lt;/span&gt;&lt;span class=&quot;dec&quot;&gt;.0&lt;/span&gt;&lt;span class=&quot;dec&quot;&gt;.1&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;csr&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;certs&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;server&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;csr&lt;/span&gt;
+&lt;span class=&quot;pun&quot;&gt;$&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;certstrap&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;depot&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;path&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;certs&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;request&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;cert&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;ip&lt;/span&gt; &lt;span class=&quot;dec&quot;&gt;127.0&lt;/span&gt;&lt;span class=&quot;dec&quot;&gt;.0&lt;/span&gt;&lt;span class=&quot;dec&quot;&gt;.1&lt;/span&gt;
+&lt;span class=&quot;pun&quot;&gt;$&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;certstrap&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;depot&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;path&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;certs&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;sign&lt;/span&gt; &lt;span class=&quot;dec&quot;&gt;127.0&lt;/span&gt;&lt;span class=&quot;dec&quot;&gt;.0&lt;/span&gt;&lt;span class=&quot;dec&quot;&gt;.1&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;typ&quot;&gt;CA&lt;/span&gt; &lt;span class=&quot;typ&quot;&gt;CertAuth&lt;/span&gt;
+&lt;span class=&quot;pun&quot;&gt;$&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;mv&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;certs&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;dec&quot;&gt;127.0&lt;/span&gt;&lt;span class=&quot;dec&quot;&gt;.0&lt;/span&gt;&lt;span class=&quot;dec&quot;&gt;.1&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;crt&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;certs&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;client&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;crt&lt;/span&gt;
+&lt;span class=&quot;pun&quot;&gt;$&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;mv&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;certs&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;dec&quot;&gt;127.0&lt;/span&gt;&lt;span class=&quot;dec&quot;&gt;.0&lt;/span&gt;&lt;span class=&quot;dec&quot;&gt;.1&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;key&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;certs&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;client&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;key&lt;/span&gt;
+&lt;span class=&quot;pun&quot;&gt;$&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;mv&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;certs&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;dec&quot;&gt;127.0&lt;/span&gt;&lt;span class=&quot;dec&quot;&gt;.0&lt;/span&gt;&lt;span class=&quot;dec&quot;&gt;.1&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;csr&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;certs&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;client&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;csr&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2&gt;Log Scribe Usage&lt;/h2&gt;
+
+&lt;p&gt;Bellow are the flags for the logScribe.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Usage of logScribe:
+  -ca string
+        certificate authority&amp;#39;s certificate
+  -console
+        dumps log lines to console
+  -crt string
+        host&amp;#39;s certificate for secured connections
+  -mediator string
+      mediators address if exists, i.e 127.0.0.1:8080
+  -path string
+        path for logs to be persisted (default &amp;#34;../logs&amp;#34;)
+  -pk string
+        host&amp;#39;s private key
+  -port int
+        port for server to listen to requests (default 8080)
+  -pport int
+        port for pprof server (default 1111)
+  -pprof
+        additional server for pprof functionality
+  -size string
+        max size for individual files, -1B for infinite size (default &amp;#34;1MB&amp;#34;)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2&gt;Multiple Scribes&lt;/h2&gt;
+
+&lt;p&gt;After the scribe was successfully produced, I begun wondering what would happen if I had so many log requests that a single scribe wouldn’t be able to handle.&lt;/p&gt;
+
+&lt;p&gt;It’s not possible to start more instances of scribes at different ports, since:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;the cluster node must know the address and port of the scribe in order to communicate with it, and&lt;/li&gt;
+&lt;li&gt;if two scribes try to write a log line to the same file, it will lock and they will panic.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;A &lt;strong&gt;Mediator&lt;/strong&gt; was necessary to resolve those two issues. A mediator:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;keeps track of all instances of scribes,&lt;/li&gt;
+&lt;li&gt;decides which scribe will write to where, and&lt;/li&gt;
+&lt;li&gt;is alone known to the cluster nodes.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;So, the first thing that a scribe must do when it starts is to register to the mediator. The mediator keeps track of all scribes registered to him and makes health checks periodically in order to establish which of them are alive and which are not.&lt;/p&gt;
+
+&lt;p&gt;This functionality requires the creation of two new gRPC services:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-protobuf&quot;&gt;&lt;span class=&quot;pln&quot;&gt;service&lt;/span&gt; &lt;span class=&quot;typ&quot;&gt;Register&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;pln&quot;&gt;rpc&lt;/span&gt; &lt;span class=&quot;typ&quot;&gt;Register&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;typ&quot;&gt;RegisterRequest&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;returns&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;typ&quot;&gt;RegisterResponse&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;pun&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;pln&quot;&gt;service&lt;/span&gt; &lt;span class=&quot;typ&quot;&gt;Pinger&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;pln&quot;&gt;rpc&lt;/span&gt; &lt;span class=&quot;typ&quot;&gt;Ping&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;typ&quot;&gt;PingRequest&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;returns&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;typ&quot;&gt;PingResponse&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;pun&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;com&quot;&gt;// PingRequest sends two numbers to mediator&lt;/span&gt;
+&lt;span class=&quot;pln&quot;&gt;message&lt;/span&gt; &lt;span class=&quot;typ&quot;&gt;PingRequest&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;kwd&quot;&gt;int32&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;a&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;dec&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;kwd&quot;&gt;int32&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;b&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;dec&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;pln&quot;&gt;string&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;streamerId&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;dec&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;pun&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;com&quot;&gt;// PingResponse returns the mediator&amp;#39;s response&lt;/span&gt;
+&lt;span class=&quot;pln&quot;&gt;message&lt;/span&gt; &lt;span class=&quot;typ&quot;&gt;PingResponse&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;kwd&quot;&gt;int32&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;res&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;dec&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;pun&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;pln&quot;&gt;message&lt;/span&gt; &lt;span class=&quot;typ&quot;&gt;RegisterRequest&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;pln&quot;&gt;string&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;id&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;dec&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;pln&quot;&gt;string&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;addr&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;dec&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;pun&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;pln&quot;&gt;message&lt;/span&gt; &lt;span class=&quot;typ&quot;&gt;RegisterResponse&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;pln&quot;&gt;string&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;res&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;dec&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;pun&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The Register service is used by the scribes to register themselves to the mediator. They pass in the RegisterRequest their id and their address in the host:port format, and they must get a &lt;em&gt;Success&lt;/em&gt; response.&lt;/p&gt;
+
+&lt;p&gt;The Pinger service is used to make health checks to scribes. It passes two integers and expects their multiplication result.&lt;/p&gt;
+
+&lt;h2&gt;Scribe files responsibility algorithm&lt;/h2&gt;
+
+&lt;p&gt;The mediator keeps track of which files each scribe is responsible for, for any given time. The current algorithm to achieve that is the simplest possible one.&lt;/p&gt;
+
+&lt;p&gt;This information is kept on a map that has as a key a character and value a scribe id. The character is compared with the first character of the incoming filename. So, if we have two scribes, the first will be responsible for writing to filenames that begin with &lt;em&gt;a to r&lt;/em&gt;, including r, and the second scribe from &lt;em&gt;s to 9&lt;/em&gt;.&lt;/p&gt;
+
+&lt;p&gt;After each health check this map is re-generated.&lt;/p&gt;
+
+&lt;h2&gt;Log Mediator Usage&lt;/h2&gt;
+
+&lt;p&gt;Bellow are the flags for the logMediator.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Usage of logMediator:
+  -ca string
+        certificate authority&amp;#39;s certificate
+  -crt string
+        host&amp;#39;s certificate for secured connections
+  -pk string
+        host&amp;#39;s private key
+  -port int
+        port for mediator server to listen to requests (default 8000)
+  -pport int
+        port for pprof server (default 1111)
+  -pprof
+        additional server for pprof functionality
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2&gt;TODO&lt;/h2&gt;
+
+&lt;ol&gt;
+&lt;li&gt;add a one-way SSL authentication for the Scribe (or Mediator)&lt;/li&gt;
+&lt;li&gt;create a more robust algorithm for load balancing among the Scribes.&lt;/li&gt;
+&lt;li&gt;investigate the use of sync.Map instead of sync.Mutex.&lt;/li&gt;
+&lt;li&gt;keep refactoring.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Get the full code &lt;a href=&quot;https://github.com/RomanosTrechlis/go-scribe&quot;&gt;here&lt;/a&gt;&lt;/p&gt;
+</description></item><item><title>How I built my new blog</title><link>romanostrechlis.github.io/ow_I_made_my_new_blog/</link><guid>romanostrechlis.github.io/ow_I_made_my_new_blog/</guid><pubDate>02 Jul 2017 11:33 +0000</pubDate><description>&lt;p&gt;Today, I ’d like to write about building this blog. I could use a Haxo or Hugo, or any other platform that exists, however I ended up writing my own static site generator in &lt;a href=&quot;https://golang.org/&quot;&gt;golang&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;For my blog generator I used the core ideas of &lt;a href=&quot;https://zupzup.org/&quot;&gt;Mario Zupan’s&lt;/a&gt; blog generator and altered it to fit my needs.&lt;/p&gt;
+
+&lt;p&gt;Zupzup explains clearly the concepts of a static blog generator, so go &lt;a href=&quot;https://zupzup.org/static-blog-generator-go/&quot;&gt;here&lt;/a&gt; and read his blog post and I’ll continue from where he stopped.&lt;/p&gt;
+
+&lt;h2&gt;1. Use a configuration file.&lt;/h2&gt;
+
+&lt;p&gt;Even though his implementation is solid, changing variables in the code in order to produce a different blog and then compiling the project again wasn’t efficient for me.&lt;/p&gt;
+
+&lt;p&gt;Additionaly, because I change blog posts on my computer and then push them to git I’ve implemented a local variation of datasource so I can use that local folder instead of a git repository.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-go&quot;&gt;    &lt;span class=&quot;kwd&quot;&gt;switch&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;config&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;typ&quot;&gt;SiteInfo&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;typ&quot;&gt;DataSource&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;typ&quot;&gt;Type&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;kwd&quot;&gt;case&lt;/span&gt; &lt;span class=&quot;str&quot;&gt;&amp;#34;git&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;:&lt;/span&gt;
+        &lt;span class=&quot;pln&quot;&gt;ds&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;datasource&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;typ&quot;&gt;NewGitDataSource&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;pln&quot;&gt;_&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;err&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;ds&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;typ&quot;&gt;Fetch&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;config&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;typ&quot;&gt;SiteInfo&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;typ&quot;&gt;DataSource&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;typ&quot;&gt;Repository&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;,&lt;/span&gt;
+            &lt;span class=&quot;pln&quot;&gt;config&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;typ&quot;&gt;SiteInfo&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;typ&quot;&gt;TempFolder&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;kwd&quot;&gt;case&lt;/span&gt; &lt;span class=&quot;str&quot;&gt;&amp;#34;local&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;:&lt;/span&gt;
+        &lt;span class=&quot;pln&quot;&gt;ds&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;datasource&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;typ&quot;&gt;NewLocalDataSource&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;pln&quot;&gt;_&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;err&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;ds&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;typ&quot;&gt;Fetch&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;config&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;typ&quot;&gt;SiteInfo&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;typ&quot;&gt;DataSource&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;typ&quot;&gt;Repository&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;,&lt;/span&gt;
+            &lt;span class=&quot;pln&quot;&gt;config&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;typ&quot;&gt;SiteInfo&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;typ&quot;&gt;TempFolder&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;kwd&quot;&gt;case&lt;/span&gt; &lt;span class=&quot;str&quot;&gt;&amp;#34;&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;:&lt;/span&gt;
+        &lt;span class=&quot;pln&quot;&gt;log&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;typ&quot;&gt;Fatal&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;str&quot;&gt;&amp;#34;please provide a datasource in the configuration file&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;pun&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The configuration file looks like this:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-javascript&quot;&gt;&lt;span class=&quot;pun&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;str&quot;&gt;&amp;#34;Author&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;str&quot;&gt;&amp;#34;Romanos Trechlis&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;,&lt;/span&gt;
+  &lt;span class=&quot;str&quot;&gt;&amp;#34;BlogURL&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;str&quot;&gt;&amp;#34;romanostrechlis.github.io&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;,&lt;/span&gt;
+  &lt;span class=&quot;str&quot;&gt;&amp;#34;BlogLanguage&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;str&quot;&gt;&amp;#34;en-us&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;,&lt;/span&gt;
+  &lt;span class=&quot;str&quot;&gt;&amp;#34;BlogDescription&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;str&quot;&gt;&amp;#34;Desc&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;,&lt;/span&gt;
+  &lt;span class=&quot;str&quot;&gt;&amp;#34;DateFormat&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;str&quot;&gt;&amp;#34;2006-01-02 15:04:05&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;,&lt;/span&gt;
+  &lt;span class=&quot;str&quot;&gt;&amp;#34;ThemePath&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;str&quot;&gt;&amp;#34;./static/&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;,&lt;/span&gt;
+  &lt;span class=&quot;str&quot;&gt;&amp;#34;BlogTitle&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;str&quot;&gt;&amp;#34;RTB&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;,&lt;/span&gt;
+  &lt;span class=&quot;str&quot;&gt;&amp;#34;NumPostsFrontPage&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;dec&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;,&lt;/span&gt;
+  &lt;span class=&quot;str&quot;&gt;&amp;#34;DataSource&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;str&quot;&gt;&amp;#34;Type&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;str&quot;&gt;&amp;#34;git&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;str&quot;&gt;&amp;#34;Repository&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;str&quot;&gt;&amp;#34;https://github.com/RomanosTrechlis/blog.git&amp;#34;&lt;/span&gt;
+  &lt;span class=&quot;pun&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;,&lt;/span&gt;
+  &lt;span class=&quot;str&quot;&gt;&amp;#34;TempFolder&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;str&quot;&gt;&amp;#34;./tmp&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;,&lt;/span&gt;
+  &lt;span class=&quot;str&quot;&gt;&amp;#34;DestFolder&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;str&quot;&gt;&amp;#34;./public&amp;#34;&lt;/span&gt;
+&lt;span class=&quot;pun&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The DataSource Type can also be &lt;em&gt;local&lt;/em&gt; and the Repository can be a folder&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-javascript&quot;&gt;&lt;span class=&quot;pun&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;str&quot;&gt;&amp;#34;Type&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;str&quot;&gt;&amp;#34;local&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;str&quot;&gt;&amp;#34;Repository&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;str&quot;&gt;&amp;#34;C:/Users/Romanos/Desktop/testLocal/blog/&amp;#34;&lt;/span&gt;
+&lt;span class=&quot;pun&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2&gt;2. Use of cli to break functionality&lt;/h2&gt;
+
+&lt;p&gt;Another issue I had was that I wish to download the blog content once and then generate the site multiple times with different templates.&lt;/p&gt;
+
+&lt;p&gt;I also wish to see what my blog would look like before I push it.&lt;/p&gt;
+
+&lt;p&gt;In order to achieve that I used flags to broke the functionality to distinct steps. So, if I want to generate, download and see the results I will run the command:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;&lt;span class=&quot;pln&quot;&gt;site&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;generator&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;fetch&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;generate&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;run&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This will download my content, generate the site and run a local server.&lt;/p&gt;
+
+&lt;h2&gt;3. Paging&lt;/h2&gt;
+
+&lt;p&gt;Zupzup shows a fixed number of blog posts on the frontpage and uses archive to show all his blog posts.&lt;/p&gt;
+
+&lt;p&gt;For my blog I wished to show a fixed number of posts and give the visitor the ability to navigate to the next page with the next fixed number of blog posts.&lt;/p&gt;
+
+&lt;p&gt;I did that using the following code:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-go&quot;&gt;    &lt;span class=&quot;com&quot;&gt;// frontpage&lt;/span&gt;
+    &lt;span class=&quot;pln&quot;&gt;paging&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;config&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;typ&quot;&gt;SiteInfo&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;typ&quot;&gt;NumPostsFrontPage&lt;/span&gt;
+    &lt;span class=&quot;pln&quot;&gt;numOfPages&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;getNumberOfPages&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;posts&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;kwd&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;dec&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;numOfPages&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;+&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;pln&quot;&gt;to&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;destination&lt;/span&gt;
+        &lt;span class=&quot;kwd&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;!&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;dec&quot;&gt;0&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;pln&quot;&gt;to&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;fmt&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;typ&quot;&gt;Sprintf&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;str&quot;&gt;&amp;#34;%s/%d&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;destination&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;+&lt;/span&gt;&lt;span class=&quot;dec&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;pun&quot;&gt;}&lt;/span&gt;
+        &lt;span class=&quot;pln&quot;&gt;toP&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;dec&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;paging&lt;/span&gt;
+        &lt;span class=&quot;kwd&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;dec&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;numOfPages&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;pln&quot;&gt;toP&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;len&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;posts&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;pun&quot;&gt;}&lt;/span&gt;
+        &lt;span class=&quot;pln&quot;&gt;generators&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kwd&quot;&gt;append&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;generators&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;typ&quot;&gt;ListingGenerator&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;typ&quot;&gt;ListingConfig&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;typ&quot;&gt;Posts&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;:&lt;/span&gt;       &lt;span class=&quot;pln&quot;&gt;posts&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;paging&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;toP&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;]&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;,&lt;/span&gt;
+            &lt;span class=&quot;typ&quot;&gt;Template&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;:&lt;/span&gt;    &lt;span class=&quot;pln&quot;&gt;t&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;,&lt;/span&gt;
+            &lt;span class=&quot;typ&quot;&gt;Destination&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;to&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;,&lt;/span&gt;
+            &lt;span class=&quot;typ&quot;&gt;PageTitle&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;:&lt;/span&gt;   &lt;span class=&quot;str&quot;&gt;&amp;#34;&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;,&lt;/span&gt;
+            &lt;span class=&quot;typ&quot;&gt;PageNum&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;:&lt;/span&gt;     &lt;span class=&quot;pln&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;dec&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;,&lt;/span&gt;
+            &lt;span class=&quot;typ&quot;&gt;MaxPageNum&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;:&lt;/span&gt;  &lt;span class=&quot;pln&quot;&gt;numOfPages&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;,&lt;/span&gt;
+        &lt;span class=&quot;pun&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;pun&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;That loop appends a new generator for every 10 post (the number of posts per page is given in the configuration file).&lt;/p&gt;
+
+&lt;p&gt;Additionally, in the html template:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-html&quot;&gt;    &lt;span class=&quot;pun&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;div&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;id&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;str&quot;&gt;&amp;#34;paging&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;gt;&lt;/span&gt;
+        &lt;span class=&quot;pun&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;kwd&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;ne&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;typ&quot;&gt;PageNum&lt;/span&gt; &lt;span class=&quot;dec&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;}&lt;/span&gt;
+        &lt;span class=&quot;pun&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;kwd&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;ne&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;typ&quot;&gt;PrevPageNum&lt;/span&gt; &lt;span class=&quot;dec&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;}&lt;/span&gt;
+        &lt;span class=&quot;pun&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;a&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;href&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;str&quot;&gt;&amp;#34;/{{if ne .PrevPageNum 1}}{{.PrevPageNum}}/{{end}}&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;gt;&lt;/span&gt;
+            &lt;span class=&quot;pun&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;!&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;typ&quot;&gt;Less&lt;/span&gt; &lt;span class=&quot;typ&quot;&gt;Than&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;icon&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;by&lt;/span&gt; &lt;span class=&quot;typ&quot;&gt;Icons8&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;gt;&lt;/span&gt;
+            &lt;span class=&quot;pun&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;img&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;style&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;str&quot;&gt;&amp;#34;vertical-align:middle&amp;#34;&lt;/span&gt; 
+                 &lt;span class=&quot;kwd&quot;&gt;class&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;str&quot;&gt;&amp;#34;icon icons8-Less-Than&amp;#34;&lt;/span&gt;
+                 &lt;span class=&quot;pln&quot;&gt;width&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;str&quot;&gt;&amp;#34;30&amp;#34;&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;height&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;str&quot;&gt;&amp;#34;30&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;gt;&lt;/span&gt;
+        &lt;span class=&quot;pun&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;a&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;gt;&lt;/span&gt;
+        &lt;span class=&quot;pun&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;kwd&quot;&gt;end&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;}&lt;/span&gt;
+        &lt;span class=&quot;pun&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;span&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;strong&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;typ&quot;&gt;PageNum&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;strong&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;span&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;gt;&lt;/span&gt;
+        &lt;span class=&quot;pun&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;kwd&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;ne&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;typ&quot;&gt;NextPageNum&lt;/span&gt; &lt;span class=&quot;dec&quot;&gt;0&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;}&lt;/span&gt;
+        &lt;span class=&quot;pun&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;a&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;href&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;str&quot;&gt;&amp;#34;/{{.NextPageNum}}/&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;gt;&lt;/span&gt;
+            &lt;span class=&quot;pun&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;!&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;typ&quot;&gt;More&lt;/span&gt; &lt;span class=&quot;typ&quot;&gt;Than&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;icon&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;by&lt;/span&gt; &lt;span class=&quot;typ&quot;&gt;Icons8&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;gt;&lt;/span&gt;
+            &lt;span class=&quot;pun&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;img&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;style&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;str&quot;&gt;&amp;#34;vertical-align:middle&amp;#34;&lt;/span&gt; 
+                 &lt;span class=&quot;kwd&quot;&gt;class&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;str&quot;&gt;&amp;#34;icon icons8-More-Than&amp;#34;&lt;/span&gt; 
+                 &lt;span class=&quot;pln&quot;&gt;width&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;str&quot;&gt;&amp;#34;30&amp;#34;&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;height&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;str&quot;&gt;&amp;#34;30&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;gt;&lt;/span&gt;
+        &lt;span class=&quot;pun&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;a&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;gt;&lt;/span&gt;
+        &lt;span class=&quot;pun&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;kwd&quot;&gt;end&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;}&lt;/span&gt;
+        &lt;span class=&quot;pun&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;kwd&quot;&gt;end&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;pun&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;div&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This code creates numbered folders that contain a new page with the next fixed amount of blog posts.&lt;/p&gt;
+
+&lt;h2&gt;4. Share buttons&lt;/h2&gt;
+
+&lt;p&gt;I also like share buttons to my blog posts. So, here is the template code:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-html&quot;&gt;    &lt;span class=&quot;pun&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;kwd&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;typ&quot;&gt;IsPost&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;pun&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;div&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;id&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;str&quot;&gt;&amp;#34;share-buttons&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;gt;&lt;/span&gt;
+        &lt;span class=&quot;pun&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;div&lt;/span&gt; &lt;span class=&quot;kwd&quot;&gt;class&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;str&quot;&gt;&amp;#34;share-button share-text&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;gt;&lt;/span&gt;
+            &lt;span class=&quot;pun&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;span&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;typ&quot;&gt;Share&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;span&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;gt;&lt;/span&gt;
+        &lt;span class=&quot;pun&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;div&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;gt;&lt;/span&gt;
+        &lt;span class=&quot;pun&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;div&lt;/span&gt; &lt;span class=&quot;kwd&quot;&gt;class&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;str&quot;&gt;&amp;#34;share-button share-button-facebook&amp;#34;&lt;/span&gt; 
+             &lt;span class=&quot;pln&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;share&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;url&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;str&quot;&gt;&amp;#34;{{.URL}}&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;gt;&lt;/span&gt;
+            &lt;span class=&quot;pun&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;div&lt;/span&gt; &lt;span class=&quot;kwd&quot;&gt;class&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;str&quot;&gt;&amp;#34;box&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;gt;&lt;/span&gt;
+                &lt;span class=&quot;pun&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;a&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;href&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;str&quot;&gt;&amp;#34;https://www.facebook.com/sharer/sharer.php
+&lt;/span&gt;                &lt;span class=&quot;pun&quot;&gt;?&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;u&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;typ&quot;&gt;URL&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;str&quot;&gt;&amp;#34;&amp;gt;
+&lt;/span&gt;                    &lt;span class=&quot;pun&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;!&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;typ&quot;&gt;Facebook&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;icon&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;by&lt;/span&gt; &lt;span class=&quot;typ&quot;&gt;Icons8&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;gt;&lt;/span&gt;
+                    &lt;span class=&quot;pun&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;img&lt;/span&gt; &lt;span class=&quot;kwd&quot;&gt;class&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;str&quot;&gt;&amp;#34;icon icons8-Facebook&amp;#34;&lt;/span&gt; 
+                         &lt;span class=&quot;pln&quot;&gt;width&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;str&quot;&gt;&amp;#34;48&amp;#34;&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;height&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;str&quot;&gt;&amp;#34;48&amp;#34;&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;&amp;gt;&lt;/span&gt;
+                &lt;span class=&quot;pun&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;a&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;gt;&lt;/span&gt;
+            &lt;span class=&quot;pun&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;div&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;gt;&lt;/span&gt;
+        &lt;span class=&quot;pun&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;div&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;gt;&lt;/span&gt;
+
+        &lt;span class=&quot;pun&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;div&lt;/span&gt; &lt;span class=&quot;kwd&quot;&gt;class&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;str&quot;&gt;&amp;#34;share-button share-button-twitter&amp;#34;&lt;/span&gt; 
+             &lt;span class=&quot;pln&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;share&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;url&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;str&quot;&gt;&amp;#34;{{.URL}}&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;gt;&lt;/span&gt;
+            &lt;span class=&quot;pun&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;div&lt;/span&gt; &lt;span class=&quot;kwd&quot;&gt;class&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;str&quot;&gt;&amp;#34;box&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;gt;&lt;/span&gt;
+                &lt;span class=&quot;pun&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;a&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;href&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;str&quot;&gt;&amp;#34;http://twitter.com/intent/tweet
+&lt;/span&gt;                &lt;span class=&quot;pun&quot;&gt;?&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;source&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;sharethiscom&lt;/span&gt;
+                &lt;span class=&quot;pun&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;text&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;typ&quot;&gt;PageTitle&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;}&lt;/span&gt;
+                &lt;span class=&quot;pun&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;url&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;typ&quot;&gt;URL&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;via&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;r_trechlis&lt;/span&gt;&lt;span class=&quot;str&quot;&gt;&amp;#34;&amp;gt;
+&lt;/span&gt;                    &lt;span class=&quot;pun&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;!&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;typ&quot;&gt;Twitter&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;icon&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;by&lt;/span&gt; &lt;span class=&quot;typ&quot;&gt;Icons8&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;gt;&lt;/span&gt;
+                    &lt;span class=&quot;pun&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;img&lt;/span&gt; &lt;span class=&quot;kwd&quot;&gt;class&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;str&quot;&gt;&amp;#34;icon icons8-Twitter&amp;#34;&lt;/span&gt; 
+                         &lt;span class=&quot;pln&quot;&gt;width&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;str&quot;&gt;&amp;#34;48&amp;#34;&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;height&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;str&quot;&gt;&amp;#34;48&amp;#34;&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;&amp;gt;&lt;/span&gt;
+                &lt;span class=&quot;pun&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;a&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;gt;&lt;/span&gt;
+            &lt;span class=&quot;pun&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;div&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;gt;&lt;/span&gt;
+        &lt;span class=&quot;pun&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;div&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;gt;&lt;/span&gt;
+
+        &lt;span class=&quot;pun&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;div&lt;/span&gt; &lt;span class=&quot;kwd&quot;&gt;class&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;str&quot;&gt;&amp;#34;share-button share-button-gplus&amp;#34;&lt;/span&gt; 
+             &lt;span class=&quot;pln&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;share&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;url&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;str&quot;&gt;&amp;#34;{{.URL}}&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;gt;&lt;/span&gt;
+            &lt;span class=&quot;pun&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;div&lt;/span&gt; &lt;span class=&quot;kwd&quot;&gt;class&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;str&quot;&gt;&amp;#34;box&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;gt;&lt;/span&gt;
+                &lt;span class=&quot;pun&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;a&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;href&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;str&quot;&gt;&amp;#34;https://plus.google.com/share?url={{.URL}}&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;gt;&lt;/span&gt;
+                    &lt;span class=&quot;pun&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;!&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;typ&quot;&gt;Google&lt;/span&gt; &lt;span class=&quot;typ&quot;&gt;Plus&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;icon&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;by&lt;/span&gt; &lt;span class=&quot;typ&quot;&gt;Icons8&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;gt;&lt;/span&gt;
+                    &lt;span class=&quot;pun&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;img&lt;/span&gt; &lt;span class=&quot;kwd&quot;&gt;class&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;str&quot;&gt;&amp;#34;icon icons8-Google-Plus&amp;#34;&lt;/span&gt; 
+                         &lt;span class=&quot;pln&quot;&gt;width&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;str&quot;&gt;&amp;#34;48&amp;#34;&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;height&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;str&quot;&gt;&amp;#34;48&amp;#34;&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;&amp;gt;&lt;/span&gt;
+                &lt;span class=&quot;pun&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;a&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;gt;&lt;/span&gt;
+            &lt;span class=&quot;pun&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;div&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;gt;&lt;/span&gt;
+        &lt;span class=&quot;pun&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;div&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;pun&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;div&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;pun&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;kwd&quot;&gt;end&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;IsPost is a boolean and URL the blog’s url.&lt;/p&gt;
+
+&lt;h2&gt;5. Future functionality: Upload&lt;/h2&gt;
+
+&lt;p&gt;I also would like to automatically upload the generated blog to github.&lt;/p&gt;
+
+&lt;p&gt;For that end I defined the &lt;strong&gt;Endpoint&lt;/strong&gt; interface:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-go&quot;&gt;&lt;span class=&quot;kwd&quot;&gt;type&lt;/span&gt; &lt;span class=&quot;typ&quot;&gt;Endpoint&lt;/span&gt; &lt;span class=&quot;kwd&quot;&gt;interface&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;typ&quot;&gt;Upload&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;to&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;string&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;error&lt;/span&gt;
+&lt;span class=&quot;pun&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Get the full code &lt;a href=&quot;https://github.com/RomanosTrechlis/blog-generator&quot;&gt;here&lt;/a&gt;&lt;/p&gt;
+</description></item><item><title>Arduino Adventure No. 1</title><link>romanostrechlis.github.io/rduino-adventure/</link><guid>romanostrechlis.github.io/rduino-adventure/</guid><pubDate>14 Jan 2017 12:12 +0000</pubDate><description>&lt;p&gt;I recently bought an Arduino Mega 2560 with a Ramps 1.4 shield the corresponding stepper motor drivers and an LCD screen. The ultimate goal is to build my first 3d printer using spare parts and then use that printer to make parts for a better one.&lt;/p&gt;
+
+&lt;p&gt;I try to build it step by step in order to understand how it works. The first thing to try is of course to connect everything together and make the LCD screen print something.&lt;/p&gt;
+
+&lt;p&gt;There are a lot of tutorials that explain how to do that, but I couldn’t find any that used a wiring with Ramps 1.4. I thing this is due to firmware like Marlin that handles that wiring.&lt;/p&gt;
+
+&lt;h2&gt;Parts&lt;/h2&gt;
+
+&lt;p&gt;For this I used the following parts:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Arduino Mega 2560&lt;/li&gt;
+&lt;li&gt;Ramps 1.4&lt;/li&gt;
+&lt;li&gt;LCD adaptor&lt;/li&gt;
+&lt;li&gt;LCD screen&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;img src=&quot;images/wired.jpg&quot; alt=&quot;All parts connected&quot;/&gt;&lt;/p&gt;
+
+&lt;h2&gt;Finding out the pins&lt;/h2&gt;
+
+&lt;p&gt;The tricky part was to find which pins where used, and for this I needed to see the schematics of Ramps 1.4 and of LCD adaptor.&lt;/p&gt;
+
+&lt;p&gt;After wiring everything together I found out that the part of Ramps 1.4 that interest me was the AUX3 and AUX4. AUX3 is the 4x2 part and AUX4 is the 18x1 part.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;images/adaptor_pins.png&quot; alt=&quot;Pins for adaptor&quot;/&gt;&lt;/p&gt;
+
+&lt;p&gt;Now the AUX3 as far as I understand is for the SD card slot of LCD screen so I won’t deal with it right now.&lt;/p&gt;
+
+&lt;p&gt;The AUX4 part however connects the digital pins of Mega 2560 with the adaptor. In the previous image the ’D’ before the number means digital. Those pins are shown in the following image.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;images/mega_pins.png&quot; alt=&quot;Mega 2560 LCD screen pins&quot;/&gt;&lt;/p&gt;
+
+&lt;p&gt;I had to also find out how the pins on the LCD screen were connected to the pins of the adaptor.&lt;/p&gt;
+
+&lt;p&gt;On the LCD screen there are 16 pins that can be connected to the adaptor by two 5x2 arrangement of pins called EXP1 and EXP2. The 16 pins of screen are as follows:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;VSS (Ground)&lt;/li&gt;
+&lt;li&gt;VDD (5V)&lt;/li&gt;
+&lt;li&gt;VE (Contrast Voltage)&lt;/li&gt;
+&lt;li&gt;RS (Register Select)&lt;/li&gt;
+&lt;li&gt;R/W (Read/Write)&lt;/li&gt;
+&lt;li&gt;E (Enable)&lt;/li&gt;
+&lt;li&gt;Data 0-7&lt;/li&gt;
+&lt;li&gt;Led+&lt;/li&gt;
+&lt;li&gt;Led-&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;The next image shows the pins arranged in EXP1 and EXP2, and how they are wired on the 18x1 pins of Ramps 1.4.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;images/exp+adaptor.png&quot; alt=&quot;Adaptor to Ramps 1.4&quot;/&gt;&lt;/p&gt;
+
+&lt;p&gt;The pins needed to write something on the screen are the RS, E, and Data 4-7. The mapping with Mega 2650 is:
++ D16 –&amp;gt; RS
++ D17 –&amp;gt; E
++ D23 –&amp;gt; Data 5
++ D25 –&amp;gt; Data 6
++ D27 –&amp;gt; Data 7
++ D29 –&amp;gt; Data 8&lt;/p&gt;
+
+&lt;p&gt;There are several tutorials that explain why these pins are needed.&lt;/p&gt;
+
+&lt;h2&gt;Coding&lt;/h2&gt;
+
+&lt;p&gt;The LiquitCrystal library provides the functionality to write on LCD screen. The key part is to declare the correct pins on initialization.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-cpp&quot;&gt;&lt;span class=&quot;pun&quot;&gt;#&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;include&lt;/span&gt; &lt;span class=&quot;str&quot;&gt;&amp;#34;Arduino.h&amp;#34;&lt;/span&gt;
+&lt;span class=&quot;pun&quot;&gt;#&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;include&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;typ&quot;&gt;LiquidCrystal&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;h&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;gt;&lt;/span&gt;
+
+&lt;span class=&quot;pun&quot;&gt;#&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;define&lt;/span&gt; &lt;span class=&quot;typ&quot;&gt;LCD_RS&lt;/span&gt; &lt;span class=&quot;dec&quot;&gt;16&lt;/span&gt;
+&lt;span class=&quot;pun&quot;&gt;#&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;define&lt;/span&gt; &lt;span class=&quot;typ&quot;&gt;LCD_E&lt;/span&gt; &lt;span class=&quot;dec&quot;&gt;17&lt;/span&gt;
+&lt;span class=&quot;pun&quot;&gt;#&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;define&lt;/span&gt; &lt;span class=&quot;typ&quot;&gt;LCD_5&lt;/span&gt; &lt;span class=&quot;dec&quot;&gt;23&lt;/span&gt;
+&lt;span class=&quot;pun&quot;&gt;#&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;define&lt;/span&gt; &lt;span class=&quot;typ&quot;&gt;LCD_6&lt;/span&gt; &lt;span class=&quot;dec&quot;&gt;25&lt;/span&gt;
+&lt;span class=&quot;pun&quot;&gt;#&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;define&lt;/span&gt; &lt;span class=&quot;typ&quot;&gt;LCD_7&lt;/span&gt; &lt;span class=&quot;dec&quot;&gt;27&lt;/span&gt;
+&lt;span class=&quot;pun&quot;&gt;#&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;define&lt;/span&gt; &lt;span class=&quot;typ&quot;&gt;LCD_8&lt;/span&gt; &lt;span class=&quot;dec&quot;&gt;29&lt;/span&gt;
+
+&lt;span class=&quot;typ&quot;&gt;LiquidCrystal&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;lcd&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;typ&quot;&gt;LCD_RS&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;typ&quot;&gt;LCD_E&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;typ&quot;&gt;LCD_5&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;typ&quot;&gt;LCD_6&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;typ&quot;&gt;LCD_7&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;typ&quot;&gt;LCD_8&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;;&lt;/span&gt;
+
+&lt;span class=&quot;kwd&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;setup&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;pln&quot;&gt;pinMode&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;typ&quot;&gt;LED_BUILTIN&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;typ&quot;&gt;OUTPUT&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;;&lt;/span&gt;
+
+  &lt;span class=&quot;com&quot;&gt;// set up the LCD&amp;#39;s number of columns and rows:&lt;/span&gt;
+  &lt;span class=&quot;pln&quot;&gt;lcd&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;kwd&quot;&gt;begin&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;dec&quot;&gt;20&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;dec&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;com&quot;&gt;// Print a message to the LCD.&lt;/span&gt;
+  &lt;span class=&quot;pln&quot;&gt;lcd&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;kwd&quot;&gt;print&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;str&quot;&gt;&amp;#34;Hello, world!&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;pln&quot;&gt;lcd&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;setCursor&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;dec&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;dec&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;pln&quot;&gt;lcd&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;kwd&quot;&gt;print&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;str&quot;&gt;&amp;#34;This is a test.&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;;&lt;/span&gt;
+
+&lt;span class=&quot;pun&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;kwd&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;loop&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;com&quot;&gt;// I keep the built-in led blinking&lt;/span&gt;
+  &lt;span class=&quot;pln&quot;&gt;digitalWrite&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;typ&quot;&gt;LED_BUILTIN&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;typ&quot;&gt;HIGH&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;pln&quot;&gt;delay&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;dec&quot;&gt;1000&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;pln&quot;&gt;digitalWrite&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;typ&quot;&gt;LED_BUILTIN&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;typ&quot;&gt;LOW&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;pln&quot;&gt;delay&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;dec&quot;&gt;1000&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;;&lt;/span&gt;
+
+  &lt;span class=&quot;com&quot;&gt;// set cursor to the last row&lt;/span&gt;
+  &lt;span class=&quot;pln&quot;&gt;lcd&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;setCursor&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;dec&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;dec&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;com&quot;&gt;// prints the number of cycle passed from reset&lt;/span&gt;
+  &lt;span class=&quot;pln&quot;&gt;lcd&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;kwd&quot;&gt;print&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;millis&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;dec&quot;&gt;1000&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;pun&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Finally the result is shown in the following image.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;images/result.jpg&quot; alt=&quot;Final result&quot;/&gt;&lt;/p&gt;
+</description></item><item><title>Maven Plugin for Partial Patches</title><link>romanostrechlis.github.io/aven-Plugin-for-Partial-Patches/</link><guid>romanostrechlis.github.io/aven-Plugin-for-Partial-Patches/</guid><pubDate>10 Dec 2016 20:14 +0000</pubDate><description>&lt;p&gt;Sometimes I need to create a partial patch for some dev environment, so I made this plugin to copy either the classes or the java source code to where I wished.
+This plugin copies classes using the same structure and under the same application context as the Web Application.&lt;/p&gt;
+
+&lt;p&gt;It requires the existence of a &lt;em&gt;build-patch.xml&lt;/em&gt; file in a given path of project.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-xml&quot;&gt;&lt;span class=&quot;pun&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;issuelist&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;gt;&lt;/span&gt;
+  &lt;span class=&quot;pun&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;issue&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;str&quot;&gt;&amp;#34;ISSUE-4334&amp;#34;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;pun&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;sourcefile&lt;/span&gt; &lt;span class=&quot;pln&quot;&gt;filepath&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;str&quot;&gt;&amp;#34;src\main\java\com\romanostrechlis\maven\plugins\patch\BuildPatchClassMojo.java&amp;#34;&lt;/span&gt; &lt;span class=&quot;pun&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;gt;&lt;/span&gt;
+  &lt;span class=&quot;pun&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;issue&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;pun&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;issuelist&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;In &lt;em&gt;pom.xml&lt;/em&gt; it should be added the following:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-xml&quot;&gt;&lt;span class=&quot;pun&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;builds&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;gt;&lt;/span&gt;
+  &lt;span class=&quot;pun&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;plugins&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;pun&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;plugin&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;gt;&lt;/span&gt;
+      &lt;span class=&quot;pun&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;groupId&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;com&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;romanostrechlis&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;maven&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;plugins&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;groupId&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;gt;&lt;/span&gt;
+      &lt;span class=&quot;pun&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;artifactId&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;patch&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;artifactId&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;gt;&lt;/span&gt;
+      &lt;span class=&quot;pun&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;version&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;dec&quot;&gt;2.1&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;version&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;gt;&lt;/span&gt;
+      &lt;span class=&quot;pun&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;configuration&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;gt;&lt;/span&gt;
+        &lt;span class=&quot;pun&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;projectBaseDir&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;project&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;basedir&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;projectBaseDir&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;gt;&lt;/span&gt;
+        &lt;span class=&quot;pun&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;patchDir&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;patch&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;path&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;\&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;patch&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;patchDir&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;gt;&lt;/span&gt;
+        &lt;span class=&quot;pun&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;issueFile&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;project&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;basedir&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;\&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;build&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;patch&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;xml&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;issueFile&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;gt;&lt;/span&gt;
+        &lt;span class=&quot;pun&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;classReplaceFolder&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;webapp&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;\&lt;/span&gt;&lt;span class=&quot;typ&quot;&gt;WEB&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;typ&quot;&gt;INF&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;\&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;classes&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;classReplaceFolder&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;gt;&lt;/span&gt;
+        &lt;span class=&quot;pun&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;contextName&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;web&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;app&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;context&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;contextName&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;gt;&lt;/span&gt;
+        &lt;span class=&quot;pun&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;configPath&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;config&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;path&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;configPath&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;gt;&lt;/span&gt;
+      &lt;span class=&quot;pun&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;configuration&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;pun&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;plugin&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;.&lt;/span&gt;
+  &lt;span class=&quot;pun&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;plugins&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;pun&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;pln&quot;&gt;builds&lt;/span&gt;&lt;span class=&quot;pun&quot;&gt;&amp;gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;There configuration tags are:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;projectBaseDir&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;patchDir&lt;/strong&gt;: where the patch folder should be created.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;issueFile&lt;/strong&gt;: what is the file containing info about the patch (see example above).&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;classReplaceFolder&lt;/strong&gt;: the content of this tag will be replaced by the &lt;em&gt;contextName&lt;/em&gt;.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;contextName&lt;/strong&gt;: replaces the content of &lt;em&gt;classReplaceFolder&lt;/em&gt; in the patch path.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;configPath&lt;/strong&gt;: the path of configuration files.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;After adding it to &lt;em&gt;pom.xml&lt;/em&gt; we can run it using the command &lt;em&gt;mvn patch:classes&lt;/em&gt; to copy classes and/or &lt;em&gt;mvn patch:sources&lt;/em&gt; to copy sources.&lt;/p&gt;
+
+&lt;p&gt;Download the source code &lt;a href=&quot;https://github.com/RomanosTrechlis/MavenPluginPatch&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;
+</description></item><item><title>The Underlying Dilemma in the Greek Referendum</title><link>romanostrechlis.github.io/he-Underlying-Dilemma-in-the-Greek-Referendum/</link><guid>romanostrechlis.github.io/he-Underlying-Dilemma-in-the-Greek-Referendum/</guid><pubDate>30 Jun 2015 23:52 +0000</pubDate><description>&lt;p&gt;This week is largely considered a historic one due to the Greek referendum. On July 5th the Greek public will decide whether to accept the troika proposal or not. What is peculiar with this referendum is that the question is highly technical and, at the same time, the government is clearly against that proposal. However, behind the referendum’s question lies a dilemma, connected to two distinct narratives of both history and reality that the Greeks haven’t been able to resolve for many generations.&lt;/p&gt;
+
+&lt;h2&gt;1. The Geopolitical narrative&lt;/h2&gt;
+
+&lt;p&gt;The first narrative is the geopolitical one, i.e. the way that geography influences politics in Greece.&lt;/p&gt;
+
+&lt;p&gt;Throughout its long history, Greece was the base of sea power states. Starting with Crete and the Aegean islands to the city states on mainland Greece and, later, to modern Greece, it was the sea that forged the identity of the Greek nation. This is not accidental. The importance of sea power over land power was well established among Greek leaders first in the antiquity, with Thucydides stating “μέγα το της θαλάσσης κράτος”, which means the state that controls the sea is a great state. Also, Themistocles consciously urged his fellow Athenians to the creation and manning of a great fleet. An additional evidence for the importance of the Athenian control over sea is the survival of the city under siege for years.&lt;/p&gt;
+
+&lt;p&gt;The close ties of Greece with the sea were noted in antiquity, and the historical evidence is corroborated by geography. Greece has 13,676 km of coastline and only 131,957 km2 of total area and an abundance of natural harbors. Furthermore, the fragmented geography enabled Greeks to defend their homeland easily against raiders and larger armies, having in the meantime the ability to move freely by sea and, in some cases, to outmaneuver the enemy, as they successfully have done during the Persian wars.&lt;/p&gt;
+
+&lt;p&gt;Greece’s sea tradition was reestablished in the 19th and 20th century. This time not as a great sea power itself, but instead in close collaboration with the great sea power. This strategic alliance between Greece and the great sea power of the time against the great land power was made by Greece’s leaders, sometimes with great effort and difficulty.&lt;/p&gt;
+
+&lt;p&gt;During the 1st World War, this decision created a schism between the Greek King Constantinos Ι and the Prime Minister Venizelos that led to a mini civil war and the intervention of Great Britain. The root of this schism is still debated in Greece.
+In the 2nd World War, Greece stood, from the beginning, by the west and consequently at the side of the great sea power. During this war, the Greek government, following the steps of the ancient Athenians, left the country and continued the fight at the North African theater of war. However, by the end of the war the established order was challenged by the Greek communists. In fact, the civil war was about the strategic orientation of Greece: land power over sea power. MacKinder’s ideas motivated Great Britain to intervene once again.&lt;/p&gt;
+
+&lt;p&gt;Many thinkers have noted the importance of sea power and the importance of the traditional sea states. Greece has kept this tradition throughout the 20th century and still keeps it. The importance of Greece as a sea nation was enhanced furthermore by MacKinder’s work. “The Greeks were the first of our seven peoples of the Middle Tier to achieve their emancipation from German control in this war for the simple reason that they are outside the Heartland and therefore accessible to sea-power. But in these days of submarines and aeroplanes, the procession of Greece by a great Hartland power would probably carry with it the control of the World-Island; the Macedonian history would be reenacted”, writes MacKinder setting Greece on the side of the great sea power.&lt;/p&gt;
+
+&lt;h2&gt;2. The cultural narrative&lt;/h2&gt;
+
+&lt;p&gt;The question of Greece’s strategic orientation was never challenged on a geopolitical basis. The only challenge came by the orthodox tradition and the socialist affiliation of some of the Greece’s political leaders.&lt;/p&gt;
+
+&lt;p&gt;From the naval exploits of Greeks in antiquity to NATO participation in 20th century, described above, there are missing two periods in history. In the first the center of gravity was displaced from Greece to the Asia Minor and in the second Greece was occupied by the Ottoman Empire.&lt;/p&gt;
+
+&lt;p&gt;Even though Greeks fashion themselves as continuing the Roman tradition within the Eastern Roman Empire, the reality is that “Byzantine Empire” is a more apt name for it. The Roman Empire displaced the center of gravity to the west, while the Byzantine Empire displaced it to the east of Greece. That transition was closely followed by the projection of naval power with Rome augmenting the control over the Mediterranean while Byzantium lost it to the Saracens and the Venetians. The influence of the Orient was great to Greeks and it got worse when Byzantium fell to the Ottomans.
+For four hundred years Greece remained in the sidelines of history. More importantly, Greece lost all the breakthroughs of western civilization. The enlightenment never arrived. So, even though Greece is the founder of the western civilization, is no longer, by some, considered part of it.&lt;/p&gt;
+
+&lt;p&gt;This tragic fate was noted by the late Samuel Huntington in his work Clash of Civilizations, where he introduced a different aspect for analysis in International Relations. Huntington, even though he acknowledges the contribution of classical Greece, sets apart modern Greece from the western civilization. Instead, he asserts that Greece, along with other Balkan states and Russia, forms the Orthodox world. That means, in geopolitical terms, that Greece is part of the great land power block.&lt;/p&gt;
+
+&lt;p&gt;Close ties with the orient remain and deeply influence Greece’s perception of reality. The support to Arab and Muslim states, the anti-Americanism, the anti-Western sentiments whenever Greece finds itself in trouble, the threats of changing its strategic western orientation, and the conspiracy theories involving western powers are common in an oriental way of thinking. This symptom can be detected not only in the Greek public, but also, sometimes, in the governing elites.&lt;/p&gt;
+
+&lt;p&gt;The oriental nature of modern Greece is evident in the “Insha’Allah” (if it is the god’s will) attitude shared with its Muslim neighbors. This attitude is the product of a metaphysical belief that some god or a supernatural power protects Greece. Upon this attitude is based most of Greece’s political rhetoric, including that of current Prime Minister Tsipras.&lt;/p&gt;
+
+&lt;h2&gt;Conclusion&lt;/h2&gt;
+
+&lt;p&gt;The question that Greeks have to answer in the upcoming referendum has nothing to do with geopolitics or culture. The question is whether the public agrees with an economic proposal made by the troika at some stage of an ongoing negotiation. However, under this highly technical question lies a fundamental strategic choice.&lt;/p&gt;
+
+&lt;p&gt;“Yes” is the answer of those that understand and acknowledge the importance of geopolitics in decision making. In contrast, “no” is the answer of those who understand Greece as culturally linked to Orthodoxy or the Muslim world through the lenses of anti-western sentiment.&lt;/p&gt;
+
+&lt;p&gt;The Greek government, consistent to its communist ideology that the history is written by the large nation masses, calls for this referendum. Greece in all its modern history followed the decisions of its leaders. Even then, the decisions divided the Greek public and sometimes led to civil wars. For the first time, however, the Greek public must decide on the gravest strategic orientation of their nation. The underlying dilemma of the referendum is the choice between a geopolitical narrative of Greece’s future and a cultural one.&lt;/p&gt;
+
+&lt;p&gt;You can download it &lt;a href=&quot;The_underlying_dilemma_in_the_Greek_Referendum.pdf&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;
+</description></item><item><title>RSS News Reader Application for Android handheld devices</title><link>romanostrechlis.github.io/SS-News-Reader-Application-for-Android-handheld-devices/</link><guid>romanostrechlis.github.io/SS-News-Reader-Application-for-Android-handheld-devices/</guid><pubDate>07 Dec 2014 10:14 +0000</pubDate><description>&lt;p&gt;The application implements a simple RSS News feed reader. I started with a lot of auto-generated code and step by step I wrote my own code to fit the problem. A simple example is the implementation of list views. I started with auto-generated type and continue coding until I transformed it to one I liked.&lt;/p&gt;
+
+&lt;p&gt;The application has been tested on phone not on tablets, so I don’t know what really happens when executed on one ;-).&lt;/p&gt;
+
+&lt;h2&gt;2. Use cases&lt;/h2&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Choose news feed and read it.&lt;/li&gt;
+&lt;li&gt;Manage the news feeds by choosing which to display.&lt;/li&gt;
+&lt;li&gt;Add more news feeds.&lt;/li&gt;
+&lt;li&gt;Setting the time interval between updates.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h2&gt;3. Design&lt;/h2&gt;
+
+&lt;p&gt;The application consists of several activities:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;The MainActivity draws an expandable list view of RSS feeds and the DetailsActivity draws the RSS items held by the selected RSS feed.&lt;/li&gt;
+&lt;li&gt;ManageActivity, NewsFeedActivity, SettingsActivity are simple activities, children of the MainActivity.&lt;/li&gt;
+&lt;li&gt;EditRssFeedActivity is a children of ManageActivity and enables the modification of RSS feed’s information or their complete deletion.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;The application contains two model classes:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;RssFeed.java represents the information of an RSS feed.&lt;/li&gt;
+&lt;li&gt;RssItem.java represents the information of a single RSS feed item.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;On the background an SQLite database is running with the help of DatabaseHanlder.java&lt;/p&gt;
+
+&lt;p&gt;Static content is Helper.java and the communication with the servers is facilitated with the RetrieveFeedTask.java
+ManageCustomArrayAdapter and ExpCustomListAdapter are classes that customize the listview and the expandable list view in ManageActivity and MainActivity respectively.&lt;/p&gt;
+
+&lt;p&gt;A service (UpdateService.java) is implemented to facilitate the update schedule.&lt;/p&gt;
+
+&lt;p&gt;This was my introduction to the world of Android devices programming.
+Download the RSS News Reader source code &lt;a href=&quot;https://github.com/RomanosTrechlis/RSSNewsReaderApp&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;
+</description></item><item><title>A comperative study of the Turkey-Israel partnership and the Greek-Cyprus-Israel axis</title><link>romanostrechlis.github.io/_comperative_study_of_the_Turkey-Israel_partnership_and_the_Greece-Cyprus-Israel_axis/</link><guid>romanostrechlis.github.io/_comperative_study_of_the_Turkey-Israel_partnership_and_the_Greece-Cyprus-Israel_axis/</guid><pubDate>21 May 2014 20:15 +0000</pubDate><description>&lt;p&gt;The South-East Mediterranean is one of the most volatile regions on the planet. Currently, there are several hotspots in the Middle East and many unresolved issues waiting to break out. This study that compares the relations and most importantly the prospects of relation between:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Israel and Turkey, and&lt;/li&gt;
+&lt;li&gt;Israel and Greece and Cyprus,
+is very ambitious. The complexity of the problems and the plethora of actors in that small region further impedes the effort.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Nevertheless, the main objective of this study is to understand which relation is more valued by Israel and consequently which one will eventually be chosen. Furthermore, what are the conditions on which that decision depends. The secondary objective is to understand the nature of Hellenic-Israeli alignment and to examine its solidity, consistency and permanence. We have to note that in this study the term Hellenic refers to both Greece and Cyprus because of their common origin.&lt;/p&gt;
+
+&lt;p&gt;This study is constructed in three parts, each one examining different elements of the problem.&lt;/p&gt;
+
+&lt;p&gt;In the first part, we examine Israel and the relations with its neighbours and the world. The objective of the first part is the establishment of Israel’s strategic imperatives. To that effect we assess the threats presented by its neighbours and we try to unmask the factors closely related with both the threats and the strategic imperatives.&lt;/p&gt;
+
+&lt;p&gt;In the second part, we examine Turkey in relation with Israel. We show the history of their relation and we establish Turkey’s foreign policy imperatives. Finally, we discuss the prospect of them being partners anew.&lt;/p&gt;
+
+&lt;p&gt;Finally, in the third part, we examine Greece and Cyprus and their relation to Israel. The pivot of Israel’s foreign policy towards Greece and Cyprus has raised many questions, mostly due to the concurrent decline of Turkish-Israeli relation. The objective of our examination is to determine the prospects and the factors affecting that relation.&lt;/p&gt;
+
+&lt;p&gt;We analyse the findings of the tree parts and present our thesis on the objectives of the study in the Conclusions. For that effect, we use the “Strengths, Weaknesses, Opportunities and Treats” (SWOT) methodology, applying it twice on Israel’s case, each time taking account of a different alignment. We comment on the results, state our conclusions and the factors that those are depended on.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Keywords:&lt;/strong&gt; Turkey-Israel relation; Greece-Cyprus-Israel axis; Threat assessment; Foreign policy; Power struggle; Iran re-entering into the international community; Mediation in the Middle East&lt;/p&gt;
+
+&lt;p&gt;The introduction of my first year thesis in International Relations (May 21, 2014)
+Supervisor: Dr. Fotis Papathanasiou&lt;/p&gt;
+
+&lt;p&gt;Read the rest by clicking &lt;a href=&quot;A_comperative_study_of_the_Turkey-Israel_partnership.pdf&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;
+</description></item></channel></rss>
