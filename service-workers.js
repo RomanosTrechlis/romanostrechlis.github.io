@@ -1,17 +1,7 @@
-var cacheName = 'rant-v1';
+import './cachedFiles.mjs';
 
-var cacheFiles = [
-	'./',
-	'./about/index.html',
-	'./favicon.ico',
-	'./beard_512.png',
-	'./beard_192.png',
-	'./manifest.json',
-	'./google.min.css',
-	'./index.html',
-	'./index.xml',
-	'./style.min.css',
-	]
+var cacheName = 'rant-v1';
+let cacheFiles = filesToCache();
 
 self.addEventListener('install', function(e) {
 	console.log('[ServiceWorker] Installed');
@@ -71,12 +61,11 @@ function requestBackend(event){
 
         caches.open(cacheName).then(function(cache){
             cache.put(event.request, response);
-            console.log('[ServiceWorker] New Data Cached', event.request.url);
+            console.log('[ServiceWorker] New Data Cached', e.request.url);
         });
 
         return res;
     })
 }
-
 
 
